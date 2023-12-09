@@ -1,16 +1,39 @@
-# riverpod_demo
+# users api in River
 
-A new Flutter project.
+> This is a practice app in which I am familiarizing myself with the concepts of Using flutter riverpod and managing application wide state data that I fetch from an API first.
 
-## Getting Started
+key moments:
+```
+final userProvider = Provider<ApiServices>(ref=>ApiServices());
 
-This project is a starting point for a Flutter application.
+final userDataProvider = FutureProvider<List<UserModels>>((ref)async{
+      return ref.watch(userProvider).getUsers()
+})
+```
+-- Note:- Every flutter riverpod application should have the provider scope i.e the runApp(ProviderScope(child: myApp())), otherwise you wont be able to access the shared state.
 
-A few resources to get you started if this is your first Flutter project:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Now to access the shared state inside of your application:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+make a statless widget and make it extend the *CONSUMER STATE WIDGET* class
+
+then:-
+```
+final _data = ref.watch(userDataProvider);
+
+Scaffold(
+body: _data.when(
+data: (_data){
+List<UserModel> userList = _data.map(e=>e).toList();
+return ListView.builder(
+itemCount: userList.length,
+ItemBuilder: (_,index){
+  return Text(userList\[index].username)
+}
+)
+},
+error:(err, s) => Text(err.toString()),
+loading:()=>CircularProgressIndicator(),
+)
+)
+
